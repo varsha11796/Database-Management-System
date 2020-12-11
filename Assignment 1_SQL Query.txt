@@ -1,0 +1,108 @@
+create table Employee(Emp_id int auto_increment primary key,First_name varchar(100),Last_name varchar(100),Salary int,Joining_date varchar(100),Department varchar(100));
+
+insert into Employee(First_name,Last_name,Salary,Joining_date,Department) values('John','Abraham',1000000,'01-JAN-13 12:00:00 AM','Banking');
+insert into Employee(First_name,Last_name,Salary,Joining_date,Department) values('Michael','Clarke',800000,'01-JAN-13 12:00:00 AM','Insurance');
+insert into Employee(First_name,Last_name,Salary,Joining_date,Department) values('Roy','Thomas',700000,'01-FEB-13 12:00:00 AM','Banking');
+insert into Employee(First_name,Last_name,Salary,Joining_date,Department) values('Tom','Jose',600000,'01-FEB-13 12:00:00 AM','Insurance');
+insert into Employee(First_name,Last_name,Salary,Joining_date,Department) values('Jerry','Pinto',650000,'01-FEB-13 12:00:00 AM','Insurance');
+insert into Employee(First_name,Last_name,Salary,Joining_date,Department) values('Philip','Mathew',750000,'01-JAN-13 12:00:00 AM','Services');
+insert into Employee(First_name,Last_name,Salary,Joining_date,Department) values('TestName1','123',650000,'01-JAN-13 12:00:00 AM','Services');
+insert into Employee(First_name,Last_name,Salary,Joining_date,Department) values('Testname2','Lname%',600000,'01-FEB-13 12:00:00 AM','Insurance');
+
+create table Incentives(Emp_ref_id int,foreign key fk1(Emp_ref_id) references Employee(Emp_id),Incentive_date varchar(100),Incentive_amount int);
+
+insert into Incentives(Emp_ref_id,Incentive_date,Incentive_amount) values(1,'01-FEB-13',5000);
+insert into Incentives(Emp_ref_id,Incentive_date,Incentive_amount) values(2,'01-FEB-13',3000);
+insert into Incentives(Emp_ref_id,Incentive_date,Incentive_amount) values(3,'01-FEB-13',4000);
+insert into Incentives(Emp_ref_id,Incentive_date,Incentive_amount) values(1,'01-JAN-13',4500);
+insert into Incentives(Emp_ref_id,Incentive_date,Incentive_amount) values(2,'01-JAN-13',3500);
+
+
+Q 1. Write a query to display unique department from employee table
+
+select distinct department from employee;
++------------+
+| department |
++------------+
+| Banking    |
+| Insurance  |
+| Services   |
++------------+
+3 rows in set (0.00 sec)
+
+Q 2. Write as query to  Employee ID's of those employees who didn't receive any incentives
+
+select Emp_id,First_name,Last_name from Employee where Emp_id not in(select Emp_ref_id from Incentives);
++--------+------------+-----------+
+| Emp_id | First_name | Last_name |
++--------+------------+-----------+
+|      4 | Tom        | Jose      |
+|      5 | Jerry      | Pinto     |
+|      6 | Philip     | Mathew    |
+|      7 | TestName1  | 123       |
+|      8 | Testname2  | Lname%    |
++--------+------------+-----------+
+5 rows in set (0.00 sec)
+
+Q 3. Write a query to display department and sum of salary of each deparment
+
+Select DEPARTMENT,sum(SALARY) Total_Salary from employee group by department;
++------------+--------------+
+| DEPARTMENT | Total_Salary |
++------------+--------------+
+| Banking    |      1700000 |
+| Insurance  |      2650000 |
+| Services   |      1400000 |
++------------+--------------+
+3 rows in set (0.00 sec)
+
+Q 4. Write a query to display top 5 earning employees by salary
+
+select * from employee order by salary desc limit 5;
++--------+------------+-----------+---------+-----------------------+------------+
+| Emp_id | First_name | Last_name | Salary  | Joining_date          | Department |
++--------+------------+-----------+---------+-----------------------+------------+
+|      1 | John       | Abraham   | 1000000 | 01-JAN-13 12:00:00 AM | Banking    |
+|      2 | Michael    | Clarke    |  800000 | 01-JAN-13 12:00:00 AM | Insurance  |
+|      6 | Philip     | Mathew    |  750000 | 01-JAN-13 12:00:00 AM | Services   |
+|      3 | Roy        | Thomas    |  700000 | 01-FEB-13 12:00:00 AM | Banking    |
+|      5 | Jerry      | Pinto     |  650000 | 01-FEB-13 12:00:00 AM | Insurance  |
++--------+------------+-----------+---------+-----------------------+------------+
+5 rows in set (0.00 sec)
+
+Q 5. Write a query to show employee and their total incentives for all employees irrespective of whether they got incentive or not. For employees who didn’t incentive it should show the total incentive as 0
+
+Select FIRST_NAME, IFNULL(INCENTIVE_AMOUNT,0) from employee A left join incentives B on A.EMP_ID = B.EMP_REF_ID;
++------------+----------------------------+
+| FIRST_NAME | IFNULL(INCENTIVE_AMOUNT,0) |
++------------+----------------------------+
+| John       |                       5000 |
+| John       |                       4500 |
+| Michael    |                       3000 |
+| Michael    |                       3500 |
+| Roy        |                       4000 |
+| Tom        |                          0 |
+| Jerry      |                          0 |
+| Philip     |                          0 |
+| TestName1  |                          0 |
+| Testname2  |                          0 |
++------------+----------------------------+
+10 rows in set (0.06 sec)
+
+Q 6. Write a procedure to split a sentence into words. Procedure should take sentence and delimiter character as input parameters
+
+create procedure split(sent varchar(100),word varchar(50))
+begin
+declare tmp varchar(255) default sent;
+myloop:loop
+if instr(tmp,word)=0 then 
+leave myloop;
+else
+select substring(tmp,1,instr(tmp,word)-1) as word; 
+set tmp=substring(tmp,instr(tmp,word)+length(word));
+end if; 
+end loop;
+select tmp as word;
+end;
+$$
+
